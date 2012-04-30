@@ -1,0 +1,227 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage[top=.5in, bottom=1in, left=.5in, right=.5in]{geometry}
+\usepackage{amsmath}
+\usepackage{comment}
+\usepackage{amssymb}
+% These are Dan's custom extensions to try to make homework layout easier...
+%% Submitter block
+\newcommand{\studentblock}[5]{
+	\begin{flushright}
+	\parbox[t]{1.5in} {
+		#1\\
+		#2\\
+		#3\\
+		#4
+	}
+	\end{flushright}
+}
+
+%% Section headers
+\newcommand{\hwSect}[1] {\noindent\large\bf#1\rm\normalsize}
+\newcommand{\hwSubSect}[1]{\noindent\large#1\normalsize\newline}
+\newcommand{\done}{$\hfill\square$}
+\newcommand{\lname}[1]{\mathop{\kern0pt\mathit{#1}}}
+\newcommand{\ifst}[3]{\text{ if } #1 \text{ then } #2 \text{ else } #3}
+\newcommand{\lets}[2]{\text{ let }x=#1\text{ in }#2}
+\newcommand{\true}{\text{True}}
+\newcommand{\false}{\text{False}}
+\newcommand{\bool}{\text{bool}}
+
+\newenvironment{lambdac}
+  {\catcode` =12 \setupspace
+   \makeordinary{:}% to make the colon an ordinary symbol
+   %%% possible other \makeordinary declarations
+   $\mathgroup0 }
+  {$}
+{\catcode` =\active\gdef\setupspace{\def {\;}}}
+\makeatletter
+\newcommand{\makeordinary}[1]{\@tempcnta=\mathcode`#1
+  \@tempcntb=\@tempcnta
+  \divide\@tempcntb by "1000
+  \multiply\@tempcntb by "1000
+  \advance\@tempcnta by -\@tempcntb
+  \mathcode`#1=\@tempcnta}
+\makeatother
+
+\title{CIS624 Homework 3}
+\author{Adam Bates, Dan Ellsworth, Joe Pletcher}
+
+\begin{document}
+\maketitle
+\noindent
+
+\hwSect{Question 1}\\
+
+\hwSubSect{1.1}
+Let $fix=\lambda f.(\lambda x.f (x \; x)) (\lambda x.f (x \; x))$ and $fact=\lambda f.\lambda n. iszero(n) \; succ(n) \; (times \; n \; (f \; pred(n)))$ in $fix \; fact (\lambda s.\lambda z.s \; (s \; z))$ where $iszero$, $succ$, $times$, and $pred$ have the standard representations discussed in class.\\ \\
+\noindent
+This program is syntactically valid however it is non-terminating in pass-by-value due to the behavior of the $fix$ function.\\
+
+\hwSubSect{1.2}
+$\alpha$-conversion effectively provides static scope to the variables; which complicates generating a terminating case with different results. The insight that an abstraction is a value and cannot be further reduced until application was critical when devising this solution.\\ \\
+\noindent
+Consider the program $(\lambda a.\lambda b.a \; b) ((\lambda x.x) (\lambda y.y))$. Using pass-by-name, this program returns $\lambda b.((\lambda x.x) (\lambda y.y)) b$. Using pass-by-value this program returns $\lambda b.(\lambda y.y) b$.\\ \\
+\noindent
+Call-by-name and call-by-value can both be used to implement any computation even though some implmentation details will be different.\\ 
+
+
+\hwSect{Question 2}
+
+%% Static scoping means we need some kind of rule to rename things...
+
+Syntax
+\begin{eqnarray*}
+M & ::= & x \\
+&|& \lambda x.M \\
+&|& M_1 M_2 \\
+&|& n \\
+&|& \true \\
+&|& \false \\
+&|& \ifst{M_0}{M_1}{M_2} \\
+&|& \lets{M_1}{M_2} \\
+\end{eqnarray*}
+
+\begin{eqnarray*}
+v & ::= & \lambda x.M \\
+&|& n \\
+&|& \true \\
+&|& \false \\
+\end{eqnarray*}
+
+Judgments - axioms
+\begin{eqnarray*}
+\overline{\dashv \lambda x.M \Downarrow v} \\
+\overline{\dashv n \Downarrow v} \\
+\overline{\dashv \true \Downarrow v} \\
+\overline{\dashv \false  \Downarrow v} \\
+\end{eqnarray*}
+
+Judgment - variables
+\begin{eqnarray*}
+{{(x,M)\in\Gamma \qquad \Gamma \dashv M \Downarrow v}\over{x \Downarrow v}}
+\end{eqnarray*}
+
+Judgments - if
+\begin{eqnarray*}
+\frac{\Gamma \dashv M_0 \Downarrow \true \qquad \Gamma \dashv M_1 \Downarrow v}{\Gamma \dashv \ifst{M_0}{M_1}{M_2} \Downarrow v} \\
+\frac{\Gamma \dashv M_0 \Downarrow \false \qquad \Gamma \dashv M_2 \Downarrow v}{\Gamma \dashv \ifst{M_0}{M_1}{M_2} \Downarrow v} \\
+\end{eqnarray*}
+
+{\it all of the above apply to all cases}\\ \\
+
+Judgments - apply -- by name
+\begin{eqnarray*}
+\frac{\Gamma \dashv M_1 \Downarrow \lambda x.M \qquad \Gamma \dashv [x \mapsto M_2]M \Downarrow v}{\Gamma \dashv M_1 M_2 \Downarrow v}
+\end{eqnarray*}
+
+Judgments - apply -- by value
+\begin{eqnarray*}
+\frac{\Gamma \dashv M_1 \Downarrow \lambda x.M \qquad \Gamma \dashv M_2 \Downarrow v_0 \qquad\Gamma \dashv [x \mapsto v_0]M \Downarrow v}{\Gamma \dashv M_1 M_2 \Downarrow v}
+\end{eqnarray*}
+
+Judgements - let -- by name dynamic
+\begin{eqnarray*}
+\frac{\Gamma,(x,M_1) \dashv M_2 \Downarrow v}{\Gamma \dashv \lets{M_1}{M_2} \Downarrow v}
+\end{eqnarray*}
+
+Judgements - let -- by value dynamic
+\begin{eqnarray*}
+\frac{\Gamma \dashv M_1 \Downarrow v_0 \qquad \Gamma,(x,v_0) \dashv M_2 \Downarrow v}{\Gamma \dashv \lets{M_1}{M_2} \Downarrow v}
+\end{eqnarray*}
+
+
+Judgements - let -- by name static
+\begin{eqnarray*}
+\frac{x\not\in dom(\Gamma) \qquad \Gamma,(x,M_1) \dashv M_2 \Downarrow v}{\Gamma \dashv \lets{M_1}{M_2} \Downarrow v} \\
+\frac{x\in dom(\Gamma) \qquad x'\not\in dom(\Gamma) \qquad \Gamma,(x',M_1) \dashv [x \mapsto x']M_2 \Downarrow v}{\Gamma \dashv \lets{M_1}{M_2} \Downarrow v}
+\end{eqnarray*}
+
+Judgements - let -- by value static
+\begin{eqnarray*}
+\frac{x\not\in dom(\Gamma) \qquad \Gamma \dashv M_1 \Downarrow v_0 \qquad \Gamma,(x,v_0) \dashv M_2 \Downarrow v}{\Gamma \dashv \lets{M_1}{M_2} \Downarrow v} \\
+\frac{x\in dom(\Gamma) \qquad x'\not\in dom(\Gamma) \qquad \Gamma \dashv M_1 \Downarrow v_0 \qquad \Gamma,(x',v_0) \dashv [x \mapsto x']M_2 \Downarrow v}{\Gamma \dashv \lets{M_1}{M_2} \Downarrow v}
+\end{eqnarray*}
+
+
+\hwSect{Exercise 8.3.4}\\
+
+\begin{itemize}
+\item {\tt E-IfTrue}: We are given that \begin{lambdac}(t_2, t_3)\end{lambdac} are of type \begin{lambdac}(T, T)\end{lambdac}. We know by the typing judgement that \begin{lambdac}if true then t_2 else t_3 : T\end{lambdac} and we know that \begin{lambdac}if true then t_2 else t_3 : T \rightarrow t_2 : T\end{lambdac} by the evaluation judgment.  
+
+\item {\tt E-IfFalse}: We are given that \begin{lambdac}(t_2, t_3)\end{lambdac} are of type \begin{lambdac}(T, T)\end{lambdac}.  We know by the typing judgement that \begin{lambdac}if false then t_2 else t_3 : T\end{lambdac} and we know that \begin{lambdac}if false then t_2 else t_3 : T \rightarrow t_3 : T\end{lambdac} by the evaluation judgment.  
+
+\item {\tt E-If}: We are given that \begin{lambdac}(t_1, t_2, t_3)\end{lambdac} are of type \begin{lambdac}(bool, T, T)\end{lambdac}.  Let us assume that \begin{lambdac}t_1 : bool \rightarrow {t_1}' : bool\end{lambdac}. We know by the evaluation judgement that \begin{lambdac}if t_1 then t_2 else t_3 \rightarrow if t_1' then t_2 else t_3 \end{lambdac} and that \begin{lambdac}if {t_1}' : bool then t_2 else t_3 : T\end{lambdac} by the typing judgment.  
+
+\item {\tt E-Succ}:  Given \begin{lambdac}t_1 : Nat\end{lambdac}.  If we assume \begin{lambdac}t_1 : Nat \rightarrow {t_1}' : Nat\end{lambdac}, then by the typing judgement for succ we know that \begin{lambdac}succ t_1 : Nat\end{lambdac}.  From this we can conclude that \begin{lambdac}succ t_1 : Nat \rightarrow succ {t_1}' : Nat\end{lambdac}.
+
+\item {\tt E-Pred}:  Given \begin{lambdac}t_1 : Nat\end{lambdac}.  If we assume \begin{lambdac}t_1 : Nat \rightarrow {t_1}' : Nat\end{lambdac}, then by the typing judgement for pred we know that \begin{lambdac}pred t_1 : Nat\end{lambdac}.  From this we can conclude that \begin{lambdac}pred t_1 : Nat \rightarrow pred {t_1}' : Nat\end{lambdac}.
+
+\item {\tt E-IsZero}:  Given \begin{lambdac}t_1 : Nat\end{lambdac}.  If we assume \begin{lambdac}t_1 : Nat \rightarrow {t_1}' : Nat\end{lambdac}, then by the typing judgement for IsZero we know that \begin{lambdac}IsZero t_1 : Nat\end{lambdac}.  From this we can conclude that \begin{lambdac}IsZero t_1 : Nat \rightarrow IsZero {t_1}' : Nat\end{lambdac}.
+
+\item {\tt E-PredZero, E-PredSucc, E-IsZeroZero, E-IsZeroSucc}: No inductive step is required on these evaluation rules.  The theorem holds by the typing judgments.
+
+\end{itemize}
+\hwSect{Exercise 9.2.2}\\
+Show (by drawing derivation trees) that the following terms have the indicated types:
+
+\begin{enumerate}
+\item \begin{lambdac}f: Bool\rightarrow{Bool} \vdash f (if false then true else false) : Bool \end{lambdac}
+\item \begin{lambdac}f: Bool\rightarrow{Bool} \vdash \lambda{x}:Bool. f (if x then false else x) : Bool\rightarrow{Bool}\end{lambdac}\\
+\end{enumerate}
+
+\hwSubSect{1.1}
+
+\begin{eqnarray*}
+{
+{{f : \bool \rightarrow \bool~\in~f : \bool \rightarrow \bool}
+\over{f : \bool \rightarrow \bool \vdash f: \bool \rightarrow \bool}}
+~~
+{
+	{
+		{{}\over{\false : \bool}}
+		~~~~~
+		{{}\over{\true : \bool}}
+	}
+\over{\ifst{\false}{\true}{\false} : \bool}}
+}
+\over{f : \bool \rightarrow \bool \vdash f (\ifst{\false}{\true}{\false} ) : \bool}
+\end{eqnarray*}
+
+\hwSubSect{1.2}
+\begin{eqnarray*}
+{
+	{
+		{
+		{
+			{}
+			\over{f : \bool~\rightarrow\bool~\in~\Gamma}
+		}
+		\over{\Gamma~\vdash~f  : \bool \rightarrow \bool}
+		}
+		~~
+		{
+		{
+			{
+			{x : \bool~\in~\Gamma}
+			\over{\Gamma~\vdash~x : \bool}
+			}
+			~~
+			{
+			{}
+			\over{\Gamma~\vdash~\false : \bool}
+			}
+			~~
+			{
+			{x : \bool~\in~\Gamma}
+			\over{\Gamma~\vdash~x : \bool}
+			}
+		}
+		\over{\Gamma~\vdash~(\ifst{x}{\false}{x}) : \bool}
+		}
+	}
+	\over{\Gamma, x : \bool~\vdash~f (\ifst{x}{\false}{x}) : \bool}
+}
+\over{f : \bool \rightarrow \bool~\vdash~\lambda x : \bool . f (\ifst{x}{\false}{x}) : \bool \rightarrow \bool}
+\end{eqnarray*}
+
+\end{document}
