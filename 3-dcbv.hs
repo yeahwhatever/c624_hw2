@@ -19,7 +19,8 @@ getEnv :: String -> Env -> Maybe Term
 getEnv k env = lookup k env
 
 eval :: Term -> Env -> Maybe Term
-eval (TmLet k v t) env  = eval t (addEnv k v env)
+eval (TmLet k v t) env  = do v' <- eval v env
+                             eval t (addEnv k v' env)
 eval (TmIf c t f) env   = do c' <- eval c env
                              case c' of
                                   TmTrue -> eval t env
