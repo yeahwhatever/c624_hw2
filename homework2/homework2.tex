@@ -1,0 +1,91 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage[top=.5in, bottom=1in, left=.5in, right=.5in]{geometry}
+\usepackage{amsmath}
+\usepackage{comment}
+\usepackage{amssymb}
+% These are Dan's custom extensions to try to make homework layout easier...
+%% Submitter block
+\newcommand{\studentblock}[5]{
+	\begin{flushright}
+	\parbox[t]{1.5in} {
+		#1\\
+		#2\\
+		#3\\
+		#4
+	}
+	\end{flushright}
+}
+
+%% Section headers
+\newcommand{\hwSect}[1] {\noindent\large\bf#1\rm\normalsize}
+\newcommand{\hwSubSect}[1]{\noindent\large#1\normalsize\newline}
+\newcommand{\done}{$\hfill\square$}
+\newcommand{\lname}[1]{\mathop{\kern0pt\mathit{#1}}}
+
+
+\newenvironment{lambdac}
+  {\catcode` =12 \setupspace
+   \makeordinary{:}% to make the colon an ordinary symbol
+   %%% possible other \makeordinary declarations
+   $\mathgroup0 }
+  {$}
+{\catcode` =\active\gdef\setupspace{\def {\;}}}
+\makeatletter
+\newcommand{\makeordinary}[1]{\@tempcnta=\mathcode`#1
+  \@tempcntb=\@tempcnta
+  \divide\@tempcntb by "1000
+  \multiply\@tempcntb by "1000
+  \advance\@tempcnta by -\@tempcntb
+  \mathcode`#1=\@tempcnta}
+\makeatother
+
+\title{CIS624 Homework 2}
+\author{Adam Bates, Dan Ellsworth, Joe Pletcher}
+
+\begin{document}
+\maketitle
+\noindent
+
+\hwSect{Question 1}\\
+{\it Consider a different definition of fix:}
+\begin{center}
+\begin{lambdac}
+fix = \lambda f. (\lambda x. f (x x ))(\lambda x. f (x x ))
+\end{lambdac}
+\end{center}
+{\it Explain why this definition does not work for a call-by-value language.}\\ \\
+\noindent
+We recall that the evaluation \begin{lambdac}\it fix A {\rightarrow}^{\ast} A fix A \end{lambdac} by the definition of the fix function.  This version of fix is a Y-combinator that generates 2 applications that can execute immediately.  In call-by-value, this will lead to immediate unrolling of the latter term, \begin{lambdac}\it fix A \end{lambdac}.  The termination condition exists in {\it A}, so this function must partially evaluate first for this definition of {\it fix} to work correctly (as it would in a call-by-need language).\\
+
+\noindent
+A partial evaluation:\\
+
+\begin{enumerate}
+\item \begin{lambdac} fix A\end{lambdac}
+\item \begin{lambdac}\lambda f. (\lambda x. f (x x ))(\lambda x. f (x x )) A\end{lambdac}
+\item \begin{lambdac}(\lambda x. A (x x))(\lambda x. A (x x))\end{lambdac}
+\item \begin{lambdac}A ((\lambda x. A (x x) ) (\lambda x. A (x x)))\end{lambdac}
+\item \begin{lambdac}A fix A\end{lambdac}
+\item At this point, a call-by-value language will continue to unfold (fix A) indefinitely before applying it to term A.
+\end{enumerate}
+
+\pagebreak
+
+\hwSect{Question 2}\\
+{\it Relate through an example the "variable-capture" problem with dynamic scope.} \\ \\
+The variable-capture problem with dynamic scope occurs when a free variable matches the name of a bound variable within a substitution.\\
+
+\noindent
+Consider the function that returns the first of two terms applied (\begin{lambdac}f=\lambda x.\lambda z.x\end{lambdac})
+in \begin{lambdac}f z y\end{lambdac}. The static expectation is that \begin{lambdac}f z y {\rightarrow}^{\ast} z\end{lambdac}. With naive substitution this is not the case since \begin{lambdac}z\end{lambdac} becomes bound during the substitution.\\
+
+\noindent
+\begin{lambdac}f z y \rightarrow (\lambda x.\lambda z.x) z y \rightarrow [x \mapsto z](\lambda z.x) y \rightarrow (\lambda z.z) y \rightarrow [z \mapsto y](z) \rightarrow y\end{lambdac}\\
+
+\noindent
+To avoid this problem, converting to static scope, free variables must be renamed before substitution so that they do not conflict with the bindings.\\
+
+\noindent
+\begin{lambdac}f z y \rightarrow (\lambda x.\lambda z.x) z' y \rightarrow [x \mapsto z'](\lambda z.x) y \rightarrow (\lambda z.z') y \rightarrow [z \mapsto y](z') \rightarrow z'\end{lambdac}
+
+\end{document}

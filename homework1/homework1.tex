@@ -1,0 +1,88 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage[top=.5in, bottom=1in, left=.5in, right=.5in]{geometry}
+\usepackage{amsmath}
+\usepackage{comment}
+\usepackage{amssymb}
+% These are Dan's custom extensions to try to make homework layout easier...
+%% Submitter block
+\newcommand{\studentblock}[5]{
+	\begin{flushright}
+	\parbox[t]{1.5in} {
+		#1\\
+		#2\\
+		#3\\
+		#4
+	}
+	\end{flushright}
+}
+
+%% Section headers
+\newcommand{\hwSect}[1] {\noindent\large\bf#1\rm\normalsize}
+\newcommand{\hwSubSect}[1]{\noindent\large#1\normalsize\newline}
+\newcommand{\done}{$\hfill\square$}
+
+
+\title{CIS624 Homework 1}
+\author{Adam Bates, Dan Ellsworth, Joe Pletcher}
+
+\begin{document}
+\maketitle
+\noindent
+
+\hwSect{2.2.6}\\
+Given the binary relation $R$ on a set $S$. Define the relation $R'$ as $R \cup \{(s,s) | s \in S \}$. Show that $R'$ is the reflexive closure of $R$.\\ \\
+Since $R$ is a relation on $S$ and $\{(s,s) | s \in S \}$ is a relation on $S$, the union of $R$ and  $\{(s,s) | s \in S \}$ must also be a relation on $S$. By definition a reflexive relation on $S$ must contain all pairs $\{(s,s) | s \in S \}$, therefore $R'$ must be reflexive by construction.\\ \\
+To be the reflexive closure, $R'$ must be the smallest relation for which $R \subseteq R'$ and $\{(s,s) | s \in S \} \subseteq R'$. Assume $R'$ is not the smallest such relation, then there must be an element $e \in R'$ that can be removed, generating $R''$. This cannot be the case since $e$ must be an element of $R$ or $e$ must be an element of $\{(s,s) | s \in S \}$ due to the construction of $R'$. Removal of $e$ would violate definition of the reflexive closure since $R \not\subseteq R''$ or $\{(s,s) | s \in S \} \not\subseteq R''$.\done\\
+
+
+\begin{comment}
+We need to show that A) all $(s_i,s_i)$ are there for all $s \in S$ to be reflexive.  We also need to show that this is the smallest possible set.  We can do this by showing that we have a reflexive set R'.  It will be the reflexive closure of R if it is the smallest possible set with the property.  So if we remove a single element it is either a component of R, a component of R ref, or both.  So if we removed it we would be broken.  
+
+PROOF BY CONTRADICTION QED MFER
+done
+\end{comment}
+
+
+\hwSect{2.2.7}\\
+Given the binary relation $R$ on a set $S$. Define $R^+$ as 
+\begin{eqnarray*}
+R_0 &=& R \\
+R_{i+1} &=& R_i \cup \{(s,u) | \text{ for some } t, (s,t) \in R_i \text{ and } (t,u) \in R_i\} \\
+R^+ &=& \bigcup_i R_i
+\end{eqnarray*}
+Show that $R^+$ is the transitive closure of $R$.\\ \\
+For a relation $R^+$ to be transitive, it must be the case that $(s,u) \in R^+$ for all $t \in S$ such that $(s,t) \in R^+ \text{ and } (t,u) \in R^+$. By the iterative construction given, a missing relation $(s,u)$ at step $i$ of the form $t \in S$ such that $(s,t) \in R^+ \text{ and } (t,u) \in R^+$ will be added at step $i+1$.\\ \\
+To be the transitive closure, $R^+$ must be the smallest relation on $S$ such that $R \subseteq R^+$ and that the transitive property holds. Assume $R^+$ is not the smallest such relation, then there must be some element $e$ that can be removed from $R^+$ without violating $R \subseteq R^+$ or the transitive property. This cannot be the case since $e$ was part of the original relation $R$ from step $0$ of the construction or $e$ was added at some step $i$ during the construction. If $e$ was in $R$, removal violates $R \subseteq R^+$. If $e$ was added during step $i$, removal would violate the transitive property; there would be some $t \in S$ where $(s,t) \in R^+$ and $(t,u) \in R^+$ and $(s,u) \not\in R^+$.\done\\ \\
+
+\begin{comment}
+We need to show that R+ really is the transitive closure.  The transitive closure means that for all s,t,u in S, if (s,t) and (t,u) are in R then (s,u) is also in R.
+
+At each iterative step, we only add elements that are applications of the transitive property.  If we remove an element then we are either removing from R or removing from R tran.
+
+How can we be guaranteed that we have everything?  R+ is the union of all transitive edges that we can possible add. If there was a missing transitive edge then we are not yet at R+.
+
+BTW we know that R+ terminates because i must be less than or equal to the cardinality of the set S.
+\end{comment}
+
+
+\hwSect{2.2.8}\\
+Suppose $R$ is a binary relation on $S$ and $P$ is a predicate on $S$ that is preserved by $R$. Show that $P$ is also preserved by $R^*$.\\ \\
+For $P$ to be preserved by $R$, if we have $P(s)$ we must also have $P(t)$ for all $(s,t) \in R$.  We know that $R \subset R^*$ by the definition of $R^*$, and by the problem definition we know that $P$ is preserved.   The reflexive closure contains relations of the form $(s,s) \in S$, and trivially $P(s) \implies P(s)$. The transitive closure $R^+$ is also contained by $R^*$, and has relations of the form $(s,u)$ where, for some $t \in S$, $(s,t) \text{ and } (t,u) \in R^+$. It must be the case that $P(s) \implies P(u)$ since, for some $(s,t),(t,u) \in R$, $P(s) \implies P(t)$ and $P(t) \implies P(u)$.\done\\ \\
+
+\begin{comment}
+There are 3 types of elements in our new set: R, R ref, and R trans.  If the pair is from R then it obsviously still preserves P.  If the element is from R ref then the preservation of P is trivial because If s R t such that P(s) and P(t).
+
+For R trans, we can look at all left terms in the relation as set S and all right terms in the relation as set T.  By applying R trans iterally we are adding new mappings from S to T.  However, we are not adding new elements to S or T; we have already evaluated the predicates of both sets in R and confirmed that R preserved P.  
+\end{comment}
+
+\hwSect{3.5.18}\\
+To force the evaluation order, we must force particular terms to be reduced to values before other terms are reduced. To make the requested change, we must first remove rules B-IfFalse and B-IfTrue. These will be replaced by the following 5 new rules.\\ \\
+
+\begin{eqnarray}
+{t_2 \Downarrow v_2}\over{\text{if $t_1$ then $t_2$ else $t_3$} \Downarrow \text{if $t_1$ then $v_2$ else $t_3$}} \\
+{t_3 \Downarrow v_3}\over{\text{if $t_1$ then $v_2$ else $t_3$} \Downarrow \text{if $t_1$ then $v_2$ else $v_3$}} \\
+{t_1 \Downarrow \text{true}}\over{\text{if $t_1$ then $v_2$ else $v_3$} \Downarrow v_2} \\
+{t_1 \Downarrow \text{false}}\over{\text{if $t_1$ then $v_2$ else $v_3$} \Downarrow v_3}
+\end{eqnarray}
+
+\end{document}
