@@ -7,10 +7,10 @@ data Term = TmLet String Term Term
     | TmFalse
     | TmNat Int
     | TmApply Term Term
-    | TmLambda String Term Env
+    | TmLambda String Term Env deriving Show
 
 -- Static Call by Name
-data Env = Env [(String, Term, Env)]
+data Env = Env [(String, Term, Env)] deriving Show
 
 addEnv :: String -> Term -> Env -> Env -> Env
 addEnv k v t (Env env) = Env $ [(k, v, t)] ++ [(a, b, e) | (a, b, e) <- env, a /= k]

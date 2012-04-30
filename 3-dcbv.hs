@@ -7,7 +7,7 @@ data Term = TmLet String Term Term
     | TmFalse
     | TmNat Int
     | TmApply Term Term
-    | TmLambda String Term 
+    | TmLambda String Term deriving Show
 
 -- Dynamic Call by Value   
 type Env = [(String, Term)]
@@ -39,3 +39,14 @@ eval (TmVar id) env     = getEnv id env
 eval (TmLambda s t) _   = return $ TmLambda s t
 eval TmTrue _           = return TmTrue
 eval TmFalse _          = return TmFalse
+
+termString :: Term -> String
+termString (TmLambda s t) = "(lambda "++ s ++" "++(termString t)++")"
+termString (TmApply t1 t2) = "("++(termString t1)++" "++(termString t2)++")"
+termString (TmNat n) = show n
+termString (TmVar i) = show i
+
+main = let v = eval (TmApply (TmLambda "a" (TmLambda "b" (TmApply (TmVar "a") (TmVar "b") ) ) ) (TmApply TmTrue (TmApply (TmLambda "y" (TmVar "y")) (TmLambda "y" (TmVar "y"))))) [] in
+           case v of
+                Just v' -> putStrLn (termString v') 
+                _ -> putStrLn "die"
