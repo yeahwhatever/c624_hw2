@@ -9,7 +9,7 @@ data Term = TmLet String Term Term
     | TmApply Term Term
     | TmLambda String Term 
 
--- Static Call by Value   
+-- Dynamic Call by Name
 type Env = [(String, Term)]
 
 addEnv :: String -> Term -> Env -> Env
